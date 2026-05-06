@@ -1,0 +1,386 @@
+[
+  {
+    "id": 1,
+    "name": "\"Konvert\" maosh va norasmiy ishchilarni aniqlash.",
+    "organizations": [
+      "Tuman hokimining birinchi o‘rinbosari",
+      "Mahalla uyushmasi",
+      "Bandlik bo‘limi",
+      "Soliq inspeksiyasi",
+      "Xalq ta'limi",
+      "Qishloq xo‘jaligi bo‘limi"
+    ],
+    "yearly_plan_sum": 216600
+  },
+  {
+    "id": 2,
+    "name": "Muddatida bitmagan qurilishlarga mol-mulk va yer solig‘i hisoblash.",
+    "organizations": [
+      "Tuman hokimining o‘rinbosari",
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 39000
+  },
+  {
+    "id": 3,
+    "name": "Uy-joy kvadratini 3 mln so‘mdan arzon sotgan quruvchilarga qo‘shimcha soliq hisoblash.",
+    "organizations": [
+      "Tuman hokimining o‘rinbosari",
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 15400
+  },
+  {
+    "id": 4,
+    "name": "Budjet obyektlarida narxni oshirish va norasmiy ishlatish holatlaridan qo‘shimcha soliq undirish.",
+    "organizations": [
+      "Tuman hokimining o‘rinbosari"
+    ],
+    "yearly_plan_sum": 130000
+  },
+  {
+    "id": 5,
+    "name": "Quruvchilarning sotilmay qolgan",
+    "organizations": [
+      "qoldiq) uy-joylari hisobidan qo‘shimcha soliq undirish. (Tuman hokimining o‘rinbosari",
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 57000
+  },
+  {
+    "id": 6,
+    "name": "Qishloq, o‘rmon va suv yerlari ijarasini qonuniylashtirish orqali tushumni oshirish.",
+    "organizations": [
+      "Tuman hokimining o‘rinbosari",
+      "Qishloq xo‘jaligi bo‘limi",
+      "Fermerlar kengashi",
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi",
+      "Kadastr palatasi"
+    ],
+    "yearly_plan_sum": 20000
+  },
+  {
+    "id": 7,
+    "name": "Yashirilgan suv iste’moli uchun qishloq xo‘jaligi korxonalaridan soliq undirish.",
+    "organizations": [
+      "Tuman hokimining o‘rinbosari",
+      "Qishloq xo‘jaligi bo‘limi",
+      "Fermerlar kengashi",
+      "Irrigatsiya bo‘limi",
+      "Ekologiya bo‘limi",
+      "Kadastr palatasi",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 38000
+  },
+  {
+    "id": 8,
+    "name": "Auksionda olingan qishloq xo‘jaligi yerlari bo‘yicha 102,9 mlrd so‘mlik qarzdorlikni undirish.",
+    "organizations": [
+      "Tuman hokimining o‘rinbosari",
+      "Qishloq xo‘jaligi bo‘limi",
+      "Kadastr palatasi",
+      "Agroinspeksiya",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 102900
+  },
+  {
+    "id": 9,
+    "name": "Zaxiradagi qishloq xo‘jaligi yerlarini “E-auksion” orqali sotishni jadallashtirish.",
+    "organizations": [
+      "Tuman hokimining o‘rinbosari",
+      "Qishloq xo‘jaligi bo‘limi",
+      "Kadastr palatasi",
+      "Agroinspeksiya"
+    ],
+    "yearly_plan_sum": 24000
+  },
+  {
+    "id": 10,
+    "name": "Toifasi o‘zgargan yerlar bo‘yicha 68 mlrd so‘m nobudgarchilik to‘lovlarini undirish.",
+    "organizations": [
+      "Tuman hokimining o‘rinbosari",
+      "Qishloq xo‘jaligi bo‘limi",
+      "Kadastr palatasi",
+      "Agroinspeksiya"
+    ],
+    "yearly_plan_sum": 18000
+  },
+  {
+    "id": 11,
+    "name": "Baliqchilik xo‘jaliklari hosildorligini tahlil qilib, yashirilgan soliqlarni aniqlash.",
+    "organizations": [
+      "IJQK Departamenti",
+      "Qishloq xo‘jaligi bo‘limi",
+      "Veterinariya bo‘limi",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 5400
+  },
+  {
+    "id": 12,
+    "name": "Chorvachilik va parrandachilikda soliq hisobotlarini tahlil qilib, qo‘shimcha tushum topish.",
+    "organizations": [
+      "IJQK Departamenti",
+      "Qishloq xo‘jaligi bo‘limi",
+      "Veterinariya bo‘limi",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 26900
+  },
+  {
+    "id": 13,
+    "name": "Klaster va fermerlarning ombordagi qoldiq mahsulotlari sotuvidan soliq hisoblash.",
+    "organizations": [
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi",
+      "Qishloq xo‘jaligi bo‘limi",
+      "Fermerlar kengashi",
+      "Elektr tarmoqlari",
+      "Gaz ta'minoti"
+    ],
+    "yearly_plan_sum": 300000
+  },
+  {
+    "id": 14,
+    "name": "Qurilish materiallarini arzon narxda ko‘rsatib, soliqdan qochish holatlarini aniqlash.",
+    "organizations": [
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi",
+      "Ekologiya bo‘limi"
+    ],
+    "yearly_plan_sum": 49500
+  },
+  {
+    "id": 15,
+    "name": "Chakana savdoda cheksiz",
+    "organizations": [
+      "kassa apparatisiz) savdo qilish holatlariga chek qo‘yish. (Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 9000
+  },
+  {
+    "id": 16,
+    "name": "Naqdga sotilib, hisobotda \"qoldiq\" deb ko‘rsatilgan tovarlarni aniqlash.",
+    "organizations": [
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 282800
+  },
+  {
+    "id": 17,
+    "name": "Suyultirilgan gaz savdosini yashirganlardan qo‘shimcha aksiz solig‘i undirish.",
+    "organizations": [
+      "Soliq inspeksiyasi",
+      "Gaz ta'minoti",
+      "IJQK Departamenti"
+    ],
+    "yearly_plan_sum": 34600
+  },
+  {
+    "id": 18,
+    "name": "Markirovkalanadigan tovarlarning noqonuniy",
+    "organizations": [
+      "yashirin) aylanmasini aniqlash. (Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 5600
+  },
+  {
+    "id": 19,
+    "name": "To‘yxona va oshxonalardagi naqd va P2P to‘lovlarni soliq bazasiga",
+    "organizations": [
+      "R-keeper",
+      "iiko orqali) integratsiya qilish. (Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 15000
+  },
+  {
+    "id": 20,
+    "name": "Mulki va ijara shartnomasi yo‘q yoki muddati o‘tgan tadbirkorlarni qonuniylashtirish.",
+    "organizations": [
+      "Tuman hokimining birinchi o‘rinbosari",
+      "Qurilish bo‘limi",
+      "Mahalla uyushmasi",
+      "Soliq inspeksiyasi",
+      "Kadastr palatasi",
+      "Kadastr agentligi"
+    ],
+    "yearly_plan_sum": 6000
+  },
+  {
+    "id": 21,
+    "name": "“Mehmon.uz”da ro‘yxatdan o‘tib, soliq hisobotida ko‘rsatilmagan mehmonxona va xostellardan soliq undirish.",
+    "organizations": [
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 5700
+  },
+  {
+    "id": 22,
+    "name": "Xususiy klinikalarni “D-MED” orqali soliq tizimiga integratsiya qilib, yashirin aylanmani qisqartirish.",
+    "organizations": [
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi",
+      "Jomboy tibbiyot birlashmasi"
+    ],
+    "yearly_plan_sum": 12000
+  },
+  {
+    "id": 23,
+    "name": "Sotilib, hisobotda \"qoldiq\" qilingan dori-darmonlar uchun dorixonalardan soliq undirish.",
+    "organizations": [
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 192500
+  },
+  {
+    "id": 24,
+    "name": "Bozor va savdo komplekslari faoliyati",
+    "organizations": [
+      "tushum",
+      "ijara",
+      "joy) bo‘yicha yagona axborot tizimini yaratish. (IJQK Departamenti",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 4600
+  },
+  {
+    "id": 25,
+    "name": "Norasmiy yuk va yo‘lovchi tashish faoliyatini qonuniylashtirish.",
+    "organizations": [
+      "Soliq inspeksiyasi",
+      "Tuman IIB - DAN"
+    ],
+    "yearly_plan_sum": 29900
+  },
+  {
+    "id": 26,
+    "name": "Elektron hisobvaraq-faktura",
+    "organizations": [
+      "EHF) nazorati orqali yashirilgan QQSni budjetga undirish. (IJQK Departamenti",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 7500
+  },
+  {
+    "id": 27,
+    "name": "Tannarx va xarajatlarni sun’iy oshirib, foyda solig‘idan qochish holatlarini bartaraf etish.",
+    "organizations": [
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 9100
+  },
+  {
+    "id": 28,
+    "name": "Majburiy markirovkasiz tovarlar savdosini aniqlash va chek qo‘yish.",
+    "organizations": [
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 15000
+  },
+  {
+    "id": 29,
+    "name": "Gaz va svet ishlatib, soliqqa \"0\" hisobot topshirgan korxonalardan 11 mlrd so‘m undirish.",
+    "organizations": [
+      "Soliq inspeksiyasi",
+      "Elektr tarmoqlari",
+      "Gaz ta'minoti"
+    ],
+    "yearly_plan_sum": 11000
+  },
+  {
+    "id": 30,
+    "name": "Sanoat korxonalari omboridagi qoldiq tovarlarni sotish hisobidan soliq undirish.",
+    "organizations": [
+      "IJQK Departamenti",
+      "Tuman MIB",
+      "Soliq inspeksiyasi",
+      "Tuman statistika bo‘limi"
+    ],
+    "yearly_plan_sum": 350100
+  },
+  {
+    "id": 31,
+    "name": "MIBdagi ijro ishlari bo‘yicha qarz va jarimalarni to‘liq undirish.",
+    "organizations": [
+      "Tuman MIB",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 120000
+  },
+  {
+    "id": 32,
+    "name": "Import hajmini yashirgan yoki \"0\" hisobot topshirganlardan 136,1 mlrd so‘m soliq undirish.",
+    "organizations": [
+      "Tuman hokimining birinchi o‘rinbosari",
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 136100
+  },
+  {
+    "id": 33,
+    "name": "Chetdan tekinga import qilinib, sotib yuborilgan tovarlar uchun soliq hisoblash.",
+    "organizations": [
+      "Tuman hokimining birinchi o‘rinbosari",
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 36700
+  },
+  {
+    "id": 34,
+    "name": "Bojxona omborida uzoq saqlanayotgan",
+    "organizations": [
+      "IM-40 ga o‘tmagan) 102",
+      "1 mln dollarlik tovarlarni rasmiylashtirish. (IJQK Departamenti",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 147000
+  },
+  {
+    "id": 35,
+    "name": "Qazib olingan ruda va noruda boyliklar hajmini yashirganlardan soliq undirish.",
+    "organizations": [
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi",
+      "Ekologiya bo‘limi"
+    ],
+    "yearly_plan_sum": 9100
+  },
+  {
+    "id": 36,
+    "name": "Soliqdan qochish va budjetni o‘zlashtirish bo‘yicha aniqlangan 74 mlrd so‘mlik zararni undirish.",
+    "organizations": [
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 200000
+  },
+  {
+    "id": 37,
+    "name": "Moliyaviy nazorat tadbirlarida aniqlangan 22 mlrd so‘mni budjetga tiklash.",
+    "organizations": [
+      "Mavjud emas"
+    ],
+    "yearly_plan_sum": 100000
+  },
+  {
+    "id": 38,
+    "name": "Kirim qilinmagan tovarlarga soxta EHF yozib, QQSdan qochganlarni aniqlash.",
+    "organizations": [
+      "IJQK Departamenti",
+      "Soliq inspeksiyasi"
+    ],
+    "yearly_plan_sum": 170000
+  }
+]
