@@ -7,6 +7,7 @@ export interface User {
   phone: string | null;
   role: UserRole;
   direction_ids: number[];
+  organization: string | null;
   is_active: boolean;
   created_at: string;
 }

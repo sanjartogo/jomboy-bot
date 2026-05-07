@@ -89,6 +89,7 @@ export async function registerContactHandler(ctx: BotContext) {
       full_name: name,
       phone: normalizePhone(phone),
       role: "masul",
+      organization: selectedOrg,
       direction_ids: assignedDirectionIds,
       is_active: true
     });

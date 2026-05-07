@@ -41,6 +41,7 @@ export async function startCommand(ctx: BotContext) {
       telegram_id: telegramId,
       full_name: ctx.from.first_name + (ctx.from.last_name ? ` ${ctx.from.last_name}` : ""),
       role: role,
+      organization: role === "hokim" ? "Jomboy tumani hokimligi" : "Boshqaruv",
       is_active: true,
       direction_ids: []
     });
