@@ -127,70 +127,46 @@ export async function textHandler(ctx: BotContext) {
     if (ctx.user.role !== "hokim" && ctx.user.role !== "admin" && ctx.user.role !== "nazoratchi") return;
     
     try {
-      const { getUsersWhoMissedToday } = await import("@/db/queries/reports");
-      const { getActiveMasullar } = await import("@/db/queries/users");
-      const { getDirection } = await import("@/config/directions");
+      const { getDetailedSlackersReport } = await import("@/db/queries/reports");
+      const report = await getDetailedSlackersReport();
       
-      const missingData = await getUsersWhoMissedToday();
-      const masullar = await getActiveMasullar();
-      const directionsData = (await import("@/config/directions-data.json")).default;
+      let message = `🚨 <b>Bugungi sustkashlar hisoboti</b>\n(Sana: ${new Date().toLocaleDateString('uz-UZ')})\n\n`;
       
-      if (masullar.length === 0) {
-        await ctx.reply("ℹ️ Tizimda hali birorta ham mas'ul xodim ro'yxatdan o'tmagan.");
-        return;
+      for (const org of report) {
+        message += `🏢 <b>${org.org_name}</b>\n`;
+        
+        if (org.is_unregistered) {
+          message += `   ⚠️ <i>(Ro'yxatdan o'tmagan)</i>\n\n`;
+          continue;
+        }
+
+        for (const user of org.users) {
+          const status = user.missing_directions.length === 0 
+            ? "✅ Hammasi topshirildi" 
+            : `❌ Chala (${user.submitted_count}/${user.total_count}): ${user.missing_directions.join(", ")}`;
+          
+          message += `   👤 ${user.full_name}: ${status}\n`;
+        }
+        message += `\n`;
       }
 
-      if (missingData.length === 0) {
-
-        await ctx.reply("🎉 Barcha xodimlar bugungi hamma hisobotlarni topshirgan!");
-        return;
-      }
-      
-      const messages: string[] = [];
-      let currentMsg = `🚨 <b>Sustkashlar ro'yxati:</b>\n\n`;
-      
-      missingData.forEach((m, i) => {
-        const user = masullar.find(u => u.id === m.user_id);
-        if (!user) return;
-        
-        // Find a representative organization name
-        let orgName = "Tashkilot nomi aniqlanmadi";
-        if (user.direction_ids && user.direction_ids.length > 0) {
-            const dirId = user.direction_ids[0];
-            const d = directionsData.find((d: any) => d.id === dirId);
-            if (d && d.organizations && d.organizations.length > 0) {
-                orgName = d.organizations[0];
-            }
+      // Telegram chekloviga ko'ra xabarni bo'lib yuboramiz
+      if (message.length > 4000) {
+        const parts = message.match(/[\s\S]{1,4000}/g) || [];
+        for (const part of parts) {
+          await ctx.reply(part, { parse_mode: "HTML" });
         }
-        
-        const isPartial = m.submitted_direction_ids.length > 0;
-        const icon = isPartial ? "⚠️" : "🚨";
-        const partialText = isPartial ? " (Qisman topshirdi)" : "";
-        
-        let chunk = `${icon} ${i + 1}. <b>${user.full_name}</b> — ${orgName}${partialText}\n`;
-        chunk += `   📞 ${user.phone || 'Telefon raqam yo\'q'}\n\n`;
-        
-        if (currentMsg.length + chunk.length > 3800) {
-            messages.push(currentMsg);
-            currentMsg = chunk;
-        } else {
-            currentMsg += chunk;
-        }
-      });
-      
-      if (currentMsg.trim()) {
-          messages.push(currentMsg);
+      } else {
+        await ctx.reply(message, { parse_mode: "HTML" });
       }
-      
-      for (const msg of messages) {
-          await ctx.reply(msg, { parse_mode: "HTML" });
-      }
+      return;
     } catch (e) {
-      logger.error({ err: e }, "Failed to get missing users");
-      await ctx.reply("❌ Xatolik yuz berdi.");
+      logger.error({ err: e }, "Failed to generate detailed slackers report");
+      await ctx.reply("❌ Hisobotni tayyorlashda xatolik yuz berdi.");
+      return;
     }
-    return;
   }
+
 
   if (text === "📈 Umumiy statistika" || text === "📈 Umumiy hisobot") {
     if (ctx.user.role !== "hokim" && ctx.user.role !== "admin" && ctx.user.role !== "nazoratchi") return;

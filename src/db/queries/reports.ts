@@ -97,57 +97,82 @@ export async function getUserReportsLastDays(
   return (data ?? []) as Report[];
 }
 
-export async function getUsersWhoMissedToday(): Promise<{ user_id: string; missing_direction_ids: number[]; submitted_direction_ids: number[] }[]> {
+export async function getDetailedSlackersReport(): Promise<{
+  org_name: string;
+  users: {
+    full_name: string;
+    missing_directions: string[];
+    submitted_count: number;
+    total_count: number;
+  }[];
+  is_unregistered: boolean;
+}[]> {
+  const { ORGANIZATIONS } = await import("@/config/organizations");
+  const { getDirection } = await import("@/config/directions");
   const today = todayISO();
 
-  // 1. Faol mas'ul xodimlarni olish
+  // 1. Faol mas'ullarni olish
   const { data: masullar, error: e1 } = await supabase
     .from("users")
-    .select("id, direction_ids, full_name")
+    .select("id, full_name, direction_ids, organization")
     .eq("role", "masul")
     .eq("is_active", true);
 
-  if (e1 || !masullar) {
-    logger.error({ error: e1 }, "Failed to get masullar");
+  if (e1) {
+    logger.error({ error: e1 }, "Failed to get masullar for slackers report");
     return [];
   }
 
-  // 2. Bugun topshirilgan barcha yo'nalishlarni olish (kim topshirganidan qat'iy nazar)
+  // 2. Bugungi hisobotlarni olish
   const { data: todayReports, error: e2 } = await supabase
     .from("reports")
-    .select("direction_id")
+    .select("direction_id, user_id")
     .eq("report_date", today);
 
   if (e2) {
-    logger.error({ error: e2 }, "Failed to get today's reports");
+    logger.error({ error: e2 }, "Failed to get reports for slackers report");
     return [];
   }
 
-  // Topshirilgan yo'nalishlar to'plami
   const submittedDirIdsGlobal = new Set((todayReports || []).map(r => r.direction_id));
 
-  const result: { user_id: string; missing_direction_ids: number[]; submitted_direction_ids: number[] }[] = [];
+  const report: any[] = [];
 
-  for (const user of masullar) {
-    const assignedDirIds = user.direction_ids || [];
-    if (assignedDirIds.length === 0) continue;
-
-    // Agar yo'nalish global ro'yxatda bo'lsa, demak u bajarilgan
-    const missingDirIds = assignedDirIds.filter((d: number) => !submittedDirIdsGlobal.has(d));
-    const submittedDirIds = assignedDirIds.filter((d: number) => submittedDirIdsGlobal.has(d));
+  for (const org of ORGANIZATIONS) {
+    const orgUsers = (masullar || []).filter(u => u.organization === org);
     
-    // Faqat birorta ham yo'nalishi yopilmagan yoki chala qolgan xodimlarni chiqaramiz
-    if (missingDirIds.length > 0) {
-      result.push({
-        user_id: user.id,
-        missing_direction_ids: missingDirIds,
-        submitted_direction_ids: submittedDirIds
+    if (orgUsers.length === 0) {
+      report.push({
+        org_name: org,
+        users: [],
+        is_unregistered: true
       });
+      continue;
     }
+
+    const userData = orgUsers.map(user => {
+      const assignedDirIds = user.direction_ids || [];
+      const missingDirIds = assignedDirIds.filter((d: number) => !submittedDirIdsGlobal.has(d));
+      const submittedDirIds = assignedDirIds.filter((d: number) => submittedDirIdsGlobal.has(d));
+
+      return {
+        full_name: user.full_name,
+        missing_directions: missingDirIds.map((id: number) => getDirection(id)?.name || `№${id}`),
+        submitted_count: submittedDirIds.length,
+        total_count: assignedDirIds.length
+      };
+    });
+
+    report.push({
+      org_name: org,
+      users: userData,
+      is_unregistered: false
+    });
   }
 
-  return result;
+  return report;
 }
+
 
 export async function getReportStats(date: string): Promise<{
   totalIdentified: number;
