@@ -100,6 +100,7 @@ export async function getUserReportsLastDays(
 export async function getUsersWhoMissedToday(): Promise<{ user_id: string; missing_direction_ids: number[]; submitted_direction_ids: number[] }[]> {
   const today = todayISO();
 
+  // 1. Faol mas'ul xodimlarni olish
   const { data: masullar, error: e1 } = await supabase
     .from("users")
     .select("id, direction_ids")
@@ -111,7 +112,8 @@ export async function getUsersWhoMissedToday(): Promise<{ user_id: string; missi
     return [];
   }
 
-  const { data: reportedUsers, error: e2 } = await supabase
+  // 2. Bugun tushgan barcha hisobotlarni olish
+  const { data: todayReports, error: e2 } = await supabase
     .from("reports")
     .select("user_id, direction_id")
     .eq("report_date", today);
@@ -121,19 +123,23 @@ export async function getUsersWhoMissedToday(): Promise<{ user_id: string; missi
     return [];
   }
 
-  // Globally submitted directions today (by anyone)
-  const globallySubmittedDirs = new Set((reportedUsers || []).map(r => r.direction_id));
-
   const result: { user_id: string; missing_direction_ids: number[]; submitted_direction_ids: number[] }[] = [];
 
   for (const user of masullar) {
     const assignedDirIds = user.direction_ids || [];
+    if (assignedDirIds.length === 0) continue;
+
+    // Ushbu xodimning bugungi topshirgan yo'nalishlari
+    const userSubmittedDirs = new Set(
+      (todayReports || [])
+        .filter(r => r.user_id === user.id)
+        .map(r => r.direction_id)
+    );
+
+    const missingDirIds = assignedDirIds.filter(d => !userSubmittedDirs.has(d));
+    const submittedDirIds = assignedDirIds.filter(d => userSubmittedDirs.has(d));
     
-    // Agar bitta yo'nalish bo'yicha kamida 1 kishi hisobot topshirgan bo'lsa, 
-    // u shu yo'nalishga mas'ul bo'lgan barchaga "topshirildi" deb hisoblanadi.
-    const missingDirIds = assignedDirIds.filter((d: number) => !globallySubmittedDirs.has(d));
-    const submittedDirIds = assignedDirIds.filter((d: number) => globallySubmittedDirs.has(d));
-    
+    // Agar biron bir yo'nalish qolib ketgan bo'lsa, ro'yxatga qo'shamiz
     if (missingDirIds.length > 0) {
       result.push({
         user_id: user.id,

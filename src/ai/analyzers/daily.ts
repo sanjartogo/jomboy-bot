@@ -107,47 +107,45 @@ interface AISummaryInput {
 async function generateAITextSummary(
   input: AISummaryInput
 ): Promise<{ summary: string }> {
-  const systemPrompt = `Sen Jomboy tuman hokimligi uchun soliq nazorati bo'yicha tahlilchisan.
+  const systemPrompt = `Siz Jomboy tuman hokimligi uchun soliq tushumlari va iqtisodiy tahlil bo'yicha professional tahlilchisiz.
+  
+Vazifangiz: Berilgan kunlik hisobotlar asosida Tuman Hokimiga "IDEAL" tahliliy xulosa (SUMMARY) tayyorlash.
 
-Vazifang: Berilgan ma'lumotlar asosida hokimga qisqa hisobot (SUMMARY) yozish:
-1. SUMMARY: 3-4 jumla — kunning umumiy holati. Qaysi sohalar yaxshi, qaysilari sust.
+Tahlilda quyidagilarga e'tibor bering:
+1. Umumiy holat: Bugungi natijalar o'tgan kunlarga nisbatan qanday? (Trend).
+2. Intizom: Nechta xodim hisobot bermadi va bu qaysi sohalarga zarar keltirmoqda?
+3. Samaradorlik: Eng yuqori natija ko'rsatganlar va eng sust ishlayotganlar o'rtasidagi farq.
+4. Tavsiya: Vaziyatni yaxshilash uchun qaysi tashkilotlar bilan qat'iy ishlash kerak?
 
-Til: rasmiy o'zbek tilida (kirill yozuvida).
-Format: faqat "SUMMARY:" bilan boshlanuvchi matn.
-Uzunlik: jami 150-200 so'z.
+Til: Rasmiy o'zbek tili (Lotin yozuvida).
+Uslub: Tanqidiy va tahliliy.
+Uzunlik: 200-300 so'z atrofida.
 
-Raqamlarni qayta yozma (men ularni allaqachon ko'rib chiqaman) — faqat MA'NOSI haqida yoz:
-- Trend nima ko'rsatmoqda?
-- Qaysi yo'nalishlarga e'tibor kerak?
-- Sustkash mas'ullar bilan qanday ishlash kerak?`;
+Muhim: Raqamlarni shunchaki sanab bermang (ular jadvalda bor), xulosa bering!`;
 
   const userMessage = `Bugungi sana: ${formatDate(input.date)}
 
-Hisobot bergan mas'ullar: ${input.submittedCount}
-Hisobot bermagan: ${input.missingCount}
+📊 STATISTIKA:
+- Jami xodimlar: ${input.submittedCount + input.missingCount}
+- Hisobot berganlar: ${input.submittedCount}
+- Hisobot BERMAGANLAR: ${input.missingCount}
 
-Bugungi natijalar:
-- Aniqlangan summa: ${formatMoney(input.totalIdentified)}
-- Undirilgan summa: ${formatMoney(input.totalCollected)}
-- Bajarilgan ishlar/XYUS soni: ${input.totalXyus} ta
+💰 NATIJALAR:
+- Aniqlangan jami: ${formatMoney(input.totalIdentified)}
+- Undirilgan jami: ${formatMoney(input.totalCollected)}
+- XYUS (ishlar soni): ${input.totalXyus} ta
 
-ETAKCHILAR (top-3):
+🟢 ETAKCHI XODIMLAR:
 ${input.topPerformers
-  .map(
-    (p, i) =>
-      `${i + 1}. ${p.full_name} — ${p.direction_name} — ${formatMoney(p.identified_sum)}`
-  )
+  .map((p, i) => `${i + 1}. ${p.full_name} (${p.direction_name}) — ${formatMoney(p.identified_sum)}`)
   .join("\n")}
 
-ENG PAST 3:
+🔴 ENG SUST XODIMLAR:
 ${input.bottomPerformers
-  .map(
-    (p, i) =>
-      `${i + 1}. ${p.full_name} — ${p.direction_name} — ${formatMoney(p.identified_sum)}`
-  )
+  .map((p, i) => `${i + 1}. ${p.full_name} (${p.direction_name}) — ${formatMoney(p.identified_sum)}`)
   .join("\n")}
 
-Hokim uchun qisqa tahlil yoz. (Tavsiya berish shart emas).`;
+Hokim uchun mukammal tahliliy xulosa tayyorlang.`;
 
   try {
     const response = await callGemini({
