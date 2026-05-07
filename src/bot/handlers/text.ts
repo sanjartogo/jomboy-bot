@@ -135,7 +135,13 @@ export async function textHandler(ctx: BotContext) {
       const masullar = await getActiveMasullar();
       const directionsData = (await import("@/config/directions-data.json")).default;
       
+      if (masullar.length === 0) {
+        await ctx.reply("ℹ️ Tizimda hali birorta ham mas'ul xodim ro'yxatdan o'tmagan.");
+        return;
+      }
+
       if (missingData.length === 0) {
+
         await ctx.reply("🎉 Barcha xodimlar bugungi hamma hisobotlarni topshirgan!");
         return;
       }
