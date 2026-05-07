@@ -21,7 +21,7 @@ interface CreateReportInput {
   status?: "submitted" | "reviewed" | "rejected";
 }
 
-export async function upsertReport(input: CreateReportInput): Promise<Report | null> {
+export async function upsertReport(input: CreateReportInput & { organization?: string | null }): Promise<Report | null> {
   const { data, error } = await supabase
     .from("reports")
     .upsert(
@@ -43,6 +43,7 @@ export async function upsertReport(input: CreateReportInput): Promise<Report | n
   }
   return data as Report;
 }
+
 
 export async function getReportsByDate(date: string): Promise<Report[]> {
   const { data, error } = await supabase
@@ -97,82 +98,75 @@ export async function getUserReportsLastDays(
   return (data ?? []) as Report[];
 }
 
-export async function getDetailedSlackersReport(): Promise<{
-  org_name: string;
-  users: {
-    full_name: string;
-    missing_directions: string[];
-    submitted_count: number;
-    total_count: number;
-  }[];
-  is_unregistered: boolean;
-}[]> {
-  const { ORGANIZATIONS } = await import("@/config/organizations");
-  const { getDirection } = await import("@/config/directions");
+export async function getDetailedSlackersReport(): Promise<any[]> {
   const today = todayISO();
 
-  // 1. Faol mas'ullarni olish
-  const { data: masullar, error: e1 } = await supabase
-    .from("users")
-    .select("id, full_name, direction_ids, organization")
-    .eq("role", "masul")
-    .eq("is_active", true);
-
-  if (e1) {
-    logger.error({ error: e1 }, "Failed to get masullar for slackers report");
-    return [];
-  }
-
-  // 2. Bugungi hisobotlarni olish
-  const { data: todayReports, error: e2 } = await supabase
+  // 1. Bugungi barcha hisobot yo'nalishlarini olish
+  const { data: reports, error: re } = await supabase
     .from("reports")
-    .select("direction_id, user_id")
+    .select("direction_id")
     .eq("report_date", today);
-
-  if (e2) {
-    logger.error({ error: e2 }, "Failed to get reports for slackers report");
-    return [];
-  }
-
-  const submittedDirIdsGlobal = new Set((todayReports || []).map((r: any) => r.direction_id));
-
-  const report: any[] = [];
-
-  for (const org of ORGANIZATIONS) {
-    const orgUsers = (masullar || []).filter((u: any) => u.organization === org);
     
-    if (orgUsers.length === 0) {
-      report.push({
-        org_name: org,
-        users: [],
-        is_unregistered: true
-      });
-      continue;
+  if (re) logger.error({ error: re }, "Error fetching reports");
+
+  const doneDirIds = new Set((reports || []).map(r => r.direction_id));
+
+  // 2. Barcha faol mas'ullarni olish
+  const { data: users, error: ue } = await supabase
+    .from("users")
+    .select("id, full_name, organization, direction_ids")
+    .eq("role", "masul")
+    .eq("is_active", true)
+    .order("organization", { ascending: true });
+
+  if (ue) return [];
+
+  // 3. Tashkilotlar bo'yicha guruhlash
+  const orgMap = new Map<string, any[]>();
+  
+  for (const user of (users || [])) {
+    const assignedIds = user.direction_ids || [];
+    const doneCount = assignedIds.filter((id: number) => doneDirIds.has(id)).length;
+    const totalCount = assignedIds.length;
+    
+    let status = "🔴 Topshirilmadi";
+    let emoji = "🔴";
+    
+    if (totalCount > 0) {
+      if (doneCount === totalCount) {
+        status = "Bajarildi";
+        emoji = "✅";
+      } else if (doneCount > 0) {
+        status = "Qisman";
+        emoji = "🟡";
+      }
+    } else {
+        emoji = "⚪";
+        status = "Yo'nalish biriktirilmagan";
     }
 
-    const userData = orgUsers.map((user: any) => {
-      const assignedDirIds: number[] = user.direction_ids || [];
-      const missingDirIds = assignedDirIds.filter((d: number) => !submittedDirIdsGlobal.has(d));
-      const submittedDirIds = assignedDirIds.filter((d: number) => submittedDirIdsGlobal.has(d));
+    const userData = {
+      full_name: user.full_name,
+      doneCount,
+      totalCount,
+      status,
+      emoji
+    };
 
-      return {
-        full_name: user.full_name,
-        missing_directions: missingDirIds.map((id: number) => getDirection(id)?.name || `№${id}`),
-        submitted_count: submittedDirIds.length,
-        total_count: assignedDirIds.length
-      };
-    });
-
-
-    report.push({
-      org_name: org,
-      users: userData,
-      is_unregistered: false
-    });
+    const org = user.organization || "Boshqa";
+    if (!orgMap.has(org)) orgMap.set(org, []);
+    orgMap.get(org)?.push(userData);
   }
 
-  return report;
+  const results = Array.from(orgMap.entries()).map(([orgName, users]) => ({
+    orgName,
+    users
+  }));
+
+  return results;
 }
+
+
 
 
 export async function getReportStats(date: string): Promise<{

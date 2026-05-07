@@ -41,6 +41,7 @@ export async function saveAndForwardReport(ctx: BotContext, type: "text" | "imag
 
     const report = await upsertReport({
       user_id: ctx.user.id,
+      organization: ctx.user.organization, // Kollektiv hisobot uchun kerak
       direction_id: dirId,
       report_date: todayISO(),
       xyus_count: xyusCount,
@@ -53,6 +54,7 @@ export async function saveAndForwardReport(ctx: BotContext, type: "text" | "imag
       ai_warnings: aiWarnings,
       needs_review: false,
     });
+
 
     if (!report) throw new Error("Failed to save report");
 

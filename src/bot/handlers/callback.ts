@@ -71,8 +71,11 @@ async function handleReviewReport(ctx: BotContext, reportId: string) {
 }
 
 async function handleAddRole(ctx: BotContext, role: string) {
+  await ctx.answerCallbackQuery();
+  
   if (!ctx.session.newUserName || !ctx.session.newUserId) {
-    await ctx.answerCallbackQuery("Xatolik: Ma'lumotlar yetarli emas.");
+    await ctx.editMessageText("❌ Xatolik: Ma'lumotlar yetarli emas. Qayta urinib ko'ring.");
+    ctx.session.step = undefined;
     return;
   }
 
@@ -81,8 +84,13 @@ async function handleAddRole(ctx: BotContext, role: string) {
   try {
     const { createUser, getUserByPhone, linkTelegramToUser } = await import("@/db/queries/users");
     
-    // 1. Avval tekshiramiz
-    const existingUser = await getUserByPhone(tempPhone);
+    // 1. Avval tekshiramiz (agar ro'yxatda bo'lsa)
+    const { data: existingUser } = await (await import("@/db/supabase")).supabase
+        .from("users")
+        .select("id")
+        .eq("telegram_id", ctx.session.newUserId)
+        .single();
+
     if (existingUser) {
       await ctx.editMessageText(`⚠️ <b>Xatolik:</b> Bu xodim (ID: ${ctx.session.newUserId}) allaqachon tizimda mavjud.`, { parse_mode: "HTML" });
       ctx.session.step = undefined;
@@ -94,7 +102,7 @@ async function handleAddRole(ctx: BotContext, role: string) {
       full_name: ctx.session.newUserName,
       phone: tempPhone, 
       role: role as any,
-      organization: null, // Admin va Nazoratchi uchun shart emas
+      organization: role === "nazoratchi" ? "Nazorat inspeksiyasi" : "Boshqaruv", 
       direction_ids: [],
       is_active: true
     });
@@ -103,15 +111,15 @@ async function handleAddRole(ctx: BotContext, role: string) {
       await linkTelegramToUser(newUser.id, ctx.session.newUserId);
 
       await ctx.editMessageText(
-        `✅ <b>Muvaffaqiyatli!</b>\n\n` +
+        `✅ <b>Muvaffaqiyatli qo'shildi!</b>\n\n` +
         `👤 Xodim: <b>${ctx.session.newUserName}</b>\n` +
         `🔑 Rol: <b>${role}</b>\n` +
         `🆔 TG ID: <code>${ctx.session.newUserId}</code>\n\n` +
-        `Ushbu xodim endi botdan foydalanishi mumkin.`,
+        `Xodim endi botga kirib, /start bosishi mumkin.`,
         { parse_mode: "HTML" }
       );
     } else {
-      await ctx.editMessageText("❌ <b>Xatolik:</b> Foydalanuvchini saqlab bo'lmadi. (Baza sozlamalarini tekshiring)", { parse_mode: "HTML" });
+      await ctx.editMessageText("❌ <b>Xatolik:</b> Foydalanuvchini saqlab bo'lmadi.", { parse_mode: "HTML" });
     }
   } catch (err) {
     logger.error({ err }, "Failed to create user via admin");
@@ -120,8 +128,11 @@ async function handleAddRole(ctx: BotContext, role: string) {
     ctx.session.step = undefined;
     ctx.session.newUserName = undefined;
     ctx.session.newUserId = undefined;
-    await ctx.reply("Asosiy menyuga qaytdingiz:", { reply_markup: mainMenuKeyboard(ctx.user!.role) });
+    
+    // Asosiy menyuni yuborish (editMessageText dan so'ng reply keyboard uchun alohida xabar kerak bo'lishi mumkin)
+    await ctx.reply("Asosiy menyu:", { reply_markup: mainMenuKeyboard(ctx.user!.role) });
   }
 }
+
 
 

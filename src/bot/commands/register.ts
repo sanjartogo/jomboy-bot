@@ -73,15 +73,8 @@ export async function registerContactHandler(ctx: BotContext) {
   
   if (!telegramId) return;
 
-  // Find corresponding directions for this organization
-  const assignedDirectionIds = directionsData
-    .filter((d: any) => {
-      if (!d.organizations) return false;
-      return d.organizations.some((org: string) => 
-        selectedOrg.includes(org) || org.includes(selectedOrg)
-      );
-    })
-    .map((d: any) => d.id);
+  const { getDirectionsForOrganization } = await import("@/config/directions");
+  const assignedDirectionIds = getDirectionsForOrganization(selectedOrg);
 
   try {
     const { normalizePhone } = await import("@/db/queries/users");
@@ -113,6 +106,7 @@ export async function registerContactHandler(ctx: BotContext) {
     } else {
       await ctx.reply("❌ Ro'yxatdan o'tishda xatolik yuz berdi. Balki bu raqam allaqachon ro'yxatdan o'tgan bo'lishi mumkin.");
     }
+
   } catch (error) {
     logger.error({ error, telegramId }, "Registration error");
     await ctx.reply("❌ Tizimda xatolik yuz berdi.");

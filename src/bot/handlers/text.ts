@@ -133,19 +133,11 @@ export async function textHandler(ctx: BotContext) {
       let message = `🚨 <b>Bugungi sustkashlar hisoboti</b>\n(Sana: ${new Date().toLocaleDateString('uz-UZ')})\n\n`;
       
       for (const org of report) {
-        message += `🏢 <b>${org.org_name}</b>\n`;
+        message += `🏢 <b>${org.orgName}</b>\n`;
         
-        if (org.is_unregistered) {
-          message += `   ⚠️ <i>(Ro'yxatdan o'tmagan)</i>\n\n`;
-          continue;
-        }
-
         for (const user of org.users) {
-          const status = user.missing_directions.length === 0 
-            ? "✅ Hammasi topshirildi" 
-            : `❌ Chala (${user.submitted_count}/${user.total_count}): ${user.missing_directions.join(", ")}`;
-          
-          message += `   👤 ${user.full_name}: ${status}\n`;
+          const ratio = `(${user.doneCount}/${user.totalCount})`;
+          message += `   ${user.emoji} ${user.full_name}: <b>${ratio} ${user.status}</b>\n`;
         }
         message += `\n`;
       }
@@ -165,6 +157,8 @@ export async function textHandler(ctx: BotContext) {
       await ctx.reply("❌ Hisobotni tayyorlashda xatolik yuz berdi.");
       return;
     }
+
+
   }
 
 
