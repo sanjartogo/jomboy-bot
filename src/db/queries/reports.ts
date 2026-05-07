@@ -134,12 +134,12 @@ export async function getDetailedSlackersReport(): Promise<{
     return [];
   }
 
-  const submittedDirIdsGlobal = new Set((todayReports || []).map(r => r.direction_id));
+  const submittedDirIdsGlobal = new Set((todayReports || []).map((r: any) => r.direction_id));
 
   const report: any[] = [];
 
   for (const org of ORGANIZATIONS) {
-    const orgUsers = (masullar || []).filter(u => u.organization === org);
+    const orgUsers = (masullar || []).filter((u: any) => u.organization === org);
     
     if (orgUsers.length === 0) {
       report.push({
@@ -150,8 +150,8 @@ export async function getDetailedSlackersReport(): Promise<{
       continue;
     }
 
-    const userData = orgUsers.map(user => {
-      const assignedDirIds = user.direction_ids || [];
+    const userData = orgUsers.map((user: any) => {
+      const assignedDirIds: number[] = user.direction_ids || [];
       const missingDirIds = assignedDirIds.filter((d: number) => !submittedDirIdsGlobal.has(d));
       const submittedDirIds = assignedDirIds.filter((d: number) => submittedDirIdsGlobal.has(d));
 
@@ -162,6 +162,7 @@ export async function getDetailedSlackersReport(): Promise<{
         total_count: assignedDirIds.length
       };
     });
+
 
     report.push({
       org_name: org,
