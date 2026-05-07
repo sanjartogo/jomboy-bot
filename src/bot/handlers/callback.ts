@@ -87,7 +87,7 @@ async function handleAddRole(ctx: BotContext, role: string) {
       is_active: true
     });
 
-    if (newUser) {
+      if (newUser) {
       await linkTelegramToUser(newUser.id, ctx.session.newUserId);
       await ctx.editMessageText(`✅ Yangi xodim qo'shildi:\n👤 Ism: ${ctx.session.newUserName}\n🏢 Rol: ${role}\n🆔 ID: ${ctx.session.newUserId}`);
       
@@ -99,7 +99,14 @@ async function handleAddRole(ctx: BotContext, role: string) {
     } else {
       await ctx.editMessageText("❌ Foydalanuvchini saqlashda xatolik yuz berdi.");
     }
+
+    // Asosiy menyuni qaytarish
+    await ctx.reply("Asosiy menyuga qaytdingiz:", {
+      reply_markup: mainMenuKeyboard(ctx.user!.role)
+    });
+
   } catch (e) {
+
     logger.error({ err: e }, "Failed to add new user");
     await ctx.editMessageText("❌ Xatolik yuz berdi.");
   } finally {
