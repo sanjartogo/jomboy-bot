@@ -18,7 +18,9 @@ export async function callbackHandler(ctx: BotContext) {
   } else if (data.startsWith("review_report:")) {
     await handleReviewReport(ctx, data.slice("review_report:".length));
   } else if (data.startsWith("add_role:")) {
-    await handleAddRole(ctx, data.slice("add_role:".length));
+    await handleAddRole(ctx);
+  } else if (data.startsWith("add_org:")) {
+    await handleAddOrg(ctx);
   } else {
     await ctx.answerCallbackQuery("Noma'lum tugma");
   }
@@ -76,18 +78,43 @@ async function handleAddRole(ctx: BotContext, role: string) {
     return;
   }
 
-  const { getUserByPhone, createUser, linkTelegramToUser } = await import("@/db/queries/users");
-  const tempPhone = `tg_${ctx.session.newUserId}`;
+  ctx.session.newUserRole = role;
+  ctx.session.step = "awaiting_new_user_org";
+
+  const { ORGANIZATIONS } = await import("@/config/organizations");
+  const keyboard = new InlineKeyboard();
   
+  ORGANIZATIONS.forEach((org, idx) => {
+    keyboard.text(org.substring(0, 30), `add_org:${idx}`).row();
+  });
+
+  await ctx.editMessageText(`✅ Rol tanlandi: <b>${role}</b>\n\nEndi ushbu xodim qaysi <b>tashkilotga</b> tegishli ekanligini tanlang:`, {
+    parse_mode: "HTML",
+    reply_markup: keyboard
+  });
+}
+
+async function handleAddOrg(ctx: BotContext) {
+  const idx = parseInt(ctx.callbackQuery?.data?.replace("add_org:", "") || "0");
+  const { ORGANIZATIONS } = await import("@/config/organizations");
+  const selectedOrg = ORGANIZATIONS[idx];
+
+  if (!selectedOrg || !ctx.session.newUserName || !ctx.session.newUserId || !ctx.session.newUserRole) {
+    await ctx.answerCallbackQuery("Xatolik yuz berdi");
+    return;
+  }
+
+  const role = ctx.session.newUserRole;
+  const tempPhone = `tg_${ctx.session.newUserId}`;
+
   try {
+    const { createUser, getUserByPhone } = await import("@/db/queries/users");
+    
     // 1. Avval tekshiramiz
     const existingUser = await getUserByPhone(tempPhone);
     if (existingUser) {
       await ctx.editMessageText(`⚠️ <b>Xatolik:</b> Bu xodim (ID: ${ctx.session.newUserId}) allaqachon tizimda mavjud.`, { parse_mode: "HTML" });
-      
-      await ctx.reply("Asosiy menyuga qaytdingiz:", {
-        reply_markup: mainMenuKeyboard(ctx.user!.role)
-      });
+      ctx.session.step = undefined;
       return;
     }
 
@@ -96,27 +123,25 @@ async function handleAddRole(ctx: BotContext, role: string) {
       full_name: ctx.session.newUserName,
       phone: tempPhone, 
       role: role as any,
+      organization: selectedOrg,
       direction_ids: [],
       is_active: true
     });
 
     if (newUser) {
+      const { linkTelegramToUser } = await import("@/db/queries/users");
       await linkTelegramToUser(newUser.id, ctx.session.newUserId);
-      await ctx.editMessageText(`✅ <b>Muvaffaqiyatli qo'shildi!</b>\n\n👤 Ism: ${ctx.session.newUserName}\n🏢 Rol: ${role}\n🆔 ID: ${ctx.session.newUserId}`, { parse_mode: "HTML" });
-      
-      try {
-          await ctx.api.sendMessage(ctx.session.newUserId, `Assalomu alaykum! 👋\n\nSiz Jomboy botda **${role}** sifatida ro'yxatdan o'tdingiz.\nBotni ishlatish uchun /start buyrug'ini bosing.`, { parse_mode: "Markdown" });
-      } catch (e) {
-          logger.warn({ userId: ctx.session.newUserId }, "Could not notify new user");
-      }
-    } else {
-      await ctx.editMessageText("❌ <b>Xatolik:</b> Foydalanuvchini saqlab bo'lmadi. (Balki bazada 'nazoratchi' roli hali ruxsat etilmagan?)", { parse_mode: "HTML" });
-    }
 
-    // Asosiy menyuni qaytarish
-    await ctx.reply("Asosiy menyuga qaytdingiz:", {
-      reply_markup: mainMenuKeyboard(ctx.user!.role)
-    });
+      await ctx.editMessageText(
+        `✅ <b>Muvaffaqiyatli!</b>\n\n` +
+        `👤 Xodim: <b>${ctx.session.newUserName}</b>\n` +
+        `🏢 Tashkilot: <b>${selectedOrg}</b>\n` +
+        `🔑 Rol: <b>${role}</b>\n` +
+        `🆔 TG ID: <code>${ctx.session.newUserId}</code>\n\n` +
+        `Endi ushbu xodim botga kirishi bilan tizim uni taniydi.`,
+        { parse_mode: "HTML" }
+      );
+    } else {
 
   } catch (e) {
     logger.error({ err: e }, "Failed to add new user");
