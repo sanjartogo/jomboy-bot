@@ -32,8 +32,9 @@ export async function morningReminder(notify: NotificationService) {
       .map((id) => {
         const d = getDirection(id);
         if (!d) return null;
-        const monthlyPlan = d.monthly_plan[monthKey] ?? 0;
+        const monthlyPlan = d.monthly_plan?.[monthKey] ?? 0;
         return `📌 №${id} — ${d.name.slice(0, 50)}\n   Reja: ${formatMoney(monthlyPlan)}`;
+
       })
       .filter(Boolean)
       .join("\n\n");

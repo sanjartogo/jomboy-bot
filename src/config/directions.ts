@@ -4,7 +4,10 @@ export interface Direction {
   id: number;
   name: string;
   responsibles: string[];
+  yearly_plan_sum?: number;
+  monthly_plan?: Record<string, number>;
 }
+
 
 export const DIRECTIONS: Direction[] = directionsData;
 
