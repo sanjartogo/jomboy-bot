@@ -103,7 +103,7 @@ export async function getUsersWhoMissedToday(): Promise<{ user_id: string; missi
   // 1. Faol mas'ul xodimlarni olish
   const { data: masullar, error: e1 } = await supabase
     .from("users")
-    .select("id, direction_ids")
+    .select("id, direction_ids, full_name")
     .eq("role", "masul")
     .eq("is_active", true);
 
@@ -112,10 +112,10 @@ export async function getUsersWhoMissedToday(): Promise<{ user_id: string; missi
     return [];
   }
 
-  // 2. Bugun tushgan barcha hisobotlarni olish
+  // 2. Bugun topshirilgan barcha yo'nalishlarni olish (kim topshirganidan qat'iy nazar)
   const { data: todayReports, error: e2 } = await supabase
     .from("reports")
-    .select("user_id, direction_id")
+    .select("direction_id")
     .eq("report_date", today);
 
   if (e2) {
@@ -123,23 +123,20 @@ export async function getUsersWhoMissedToday(): Promise<{ user_id: string; missi
     return [];
   }
 
+  // Topshirilgan yo'nalishlar to'plami
+  const submittedDirIdsGlobal = new Set((todayReports || []).map(r => r.direction_id));
+
   const result: { user_id: string; missing_direction_ids: number[]; submitted_direction_ids: number[] }[] = [];
 
   for (const user of masullar) {
     const assignedDirIds = user.direction_ids || [];
     if (assignedDirIds.length === 0) continue;
 
-    // Ushbu xodimning bugungi topshirgan yo'nalishlari
-    const userSubmittedDirs = new Set(
-      (todayReports || [])
-        .filter(r => r.user_id === user.id)
-        .map(r => r.direction_id)
-    );
-
-    const missingDirIds = assignedDirIds.filter(d => !userSubmittedDirs.has(d));
-    const submittedDirIds = assignedDirIds.filter(d => userSubmittedDirs.has(d));
+    // Agar yo'nalish global ro'yxatda bo'lsa, demak u bajarilgan
+    const missingDirIds = assignedDirIds.filter(d => !submittedDirIdsGlobal.has(d));
+    const submittedDirIds = assignedDirIds.filter(d => submittedDirIdsGlobal.has(d));
     
-    // Agar biron bir yo'nalish qolib ketgan bo'lsa, ro'yxatga qo'shamiz
+    // Faqat birorta ham yo'nalishi yopilmagan yoki chala qolgan xodimlarni chiqaramiz
     if (missingDirIds.length > 0) {
       result.push({
         user_id: user.id,

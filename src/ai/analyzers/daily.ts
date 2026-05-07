@@ -107,45 +107,28 @@ interface AISummaryInput {
 async function generateAITextSummary(
   input: AISummaryInput
 ): Promise<{ summary: string }> {
-  const systemPrompt = `Siz Jomboy tuman hokimligi uchun soliq tushumlari va iqtisodiy tahlil bo'yicha professional tahlilchisiz.
+  const systemPrompt = `Siz Jomboy tuman hokimi uchun professional tahlilchisiz.
   
-Vazifangiz: Berilgan kunlik hisobotlar asosida Tuman Hokimiga "IDEAL" tahliliy xulosa (SUMMARY) tayyorlash.
+Vazifangiz: Kunlik natijalarni tahlil qilib, hokimga juda qisqa va aniq xulosa berish.
 
-Tahlilda quyidagilarga e'tibor bering:
-1. Umumiy holat: Bugungi natijalar o'tgan kunlarga nisbatan qanday? (Trend).
-2. Intizom: Nechta xodim hisobot bermadi va bu qaysi sohalarga zarar keltirmoqda?
-3. Samaradorlik: Eng yuqori natija ko'rsatganlar va eng sust ishlayotganlar o'rtasidagi farq.
-4. Tavsiya: Vaziyatni yaxshilash uchun qaysi tashkilotlar bilan qat'iy ishlash kerak?
+Xulosa formati:
+1. JIDDIY ISHLASH KERAK: (Xodimlar va tashkilotlar ro'yxati, nega ularni tanlaganingiz qisqacha).
+2. MASLAHAT: (Vaziyatni yaxshilash uchun 1-2 ta aniq taklif).
 
-Til: Rasmiy o'zbek tili (Lotin yozuvida).
-Uslub: Tanqidiy va tahliliy.
-Uzunlik: 200-300 so'z atrofida.
+Eslatma: Juda uzun yozmang, hokimning vaqti kam. Faqat lotin yozuvida o'zbek tilida yozing.`;
 
-Muhim: Raqamlarni shunchaki sanab bermang (ular jadvalda bor), xulosa bering!`;
-
-  const userMessage = `Bugungi sana: ${formatDate(input.date)}
-
-📊 STATISTIKA:
-- Jami xodimlar: ${input.submittedCount + input.missingCount}
-- Hisobot berganlar: ${input.submittedCount}
-- Hisobot BERMAGANLAR: ${input.missingCount}
-
-💰 NATIJALAR:
+  const userMessage = `Bugungi natijalar:
 - Aniqlangan jami: ${formatMoney(input.totalIdentified)}
 - Undirilgan jami: ${formatMoney(input.totalCollected)}
-- XYUS (ishlar soni): ${input.totalXyus} ta
+- Hisobot bermaganlar soni: ${input.missingCount}
 
-🟢 ETAKCHI XODIMLAR:
-${input.topPerformers
-  .map((p, i) => `${i + 1}. ${p.full_name} (${p.direction_name}) — ${formatMoney(p.identified_sum)}`)
-  .join("\n")}
+ETAKCHILAR:
+${input.topPerformers.map(p => `- ${p.full_name} (${p.direction_name})`).join("\n")}
 
-🔴 ENG SUST XODIMLAR:
-${input.bottomPerformers
-  .map((p, i) => `${i + 1}. ${p.full_name} (${p.direction_name}) — ${formatMoney(p.identified_sum)}`)
-  .join("\n")}
+SUSTKASHLAR:
+${input.bottomPerformers.map(p => `- ${p.full_name} (${p.direction_name})`).join("\n")}
 
-Hokim uchun mukammal tahliliy xulosa tayyorlang.`;
+Hokim uchun qisqa va londa tahlil tayyorlang.`;
 
   try {
     const response = await callGemini({
