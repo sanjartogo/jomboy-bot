@@ -15,7 +15,25 @@ export async function saveAndForwardReport(ctx: BotContext, type: "text" | "imag
   const dirName = dir?.name || `№${dirId}`;
 
   try {
-    // 1. Bazaga yozish
+    // 1. AI orqali tahlil qilish (agar matn bo'lsa)
+    let xyusCount = 0;
+    let identifiedSum = 0;
+    let collectedSum = 0;
+    let aiWarnings: string[] = [];
+
+    if (type === "text" && ctx.message?.text) {
+      const { parseReportData } = await import("@/ai/parsers/report");
+      const parsed = await parseReportData(ctx.message.text, "text");
+      
+      if (parsed.directions.length > 0) {
+        const d = parsed.directions[0];
+        xyusCount = d.xyus_count || 0;
+        identifiedSum = d.identified_sum || 0;
+        collectedSum = d.collected_sum || 0;
+      }
+      aiWarnings = parsed.warnings || [];
+    }
+
     let sourceType: any = type;
     if (ctx.message?.voice) sourceType = "voice";
     else if (ctx.message?.video) sourceType = "video";
@@ -25,14 +43,14 @@ export async function saveAndForwardReport(ctx: BotContext, type: "text" | "imag
       user_id: ctx.user.id,
       direction_id: dirId,
       report_date: todayISO(),
-      xyus_count: 0,
-      identified_sum: 0,
-      collected_sum: 0,
+      xyus_count: xyusCount,
+      identified_sum: identifiedSum,
+      collected_sum: collectedSum,
       source_type: sourceType,
       source_file_url: null, 
       raw_input: type === "text" ? ctx.message?.text : null,
       ai_confidence: 1.0,
-      ai_warnings: [],
+      ai_warnings: aiWarnings,
       needs_review: false,
     });
 
@@ -41,12 +59,19 @@ export async function saveAndForwardReport(ctx: BotContext, type: "text" | "imag
     // 2. Nazoratchilarga yuborish
     const recipients = await getAllUsersByRole("nazoratchi");
 
+    const { formatMoney } = await import("@/utils/format");
+
     const caption = `📝 <b>Yangi hisobot keldi!</b>\n\n` +
       `🏢 Tashkilot: <b>${ctx.user.organization || "Noma'lum"}</b>\n` +
       `👤 Xodim: <b>${ctx.user.full_name}</b>\n` +
       `📌 Yo'nalish: <b>${dirName}</b>\n` +
       `📅 Sana: ${todayISO()}\n\n` +
+      `🔢 <b>Ma'lumotlar:</b>\n` +
+      `   • XYUS: ${xyusCount} ta\n` +
+      `   • Aniqlangan: ${formatMoney(identifiedSum)}\n` +
+      `   • Undirilgan: ${formatMoney(collectedSum)}\n\n` +
       `👇 <i>Ushbu hisobot ma'lumotlarini tekshiring va tasdiqlang.</i>`;
+
 
     const keyboard = new InlineKeyboard()
       .text("✅ Ko'rib chiqildi", `review_report:${report.id}`);

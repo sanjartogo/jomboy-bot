@@ -34,7 +34,6 @@ export function createBot(): Bot<BotContext> {
   // Commands (ro'yxatdan o'tmaganlarga ham /start ishlaydi)
   bot.command("start", startCommand);
   bot.on(":contact", registerContactHandler); // Ro'yxatdan o'tish uchun kontaktni tutib olamiz
-  bot.on(":contact", handleContact); // Eskirgan raqam yuborish uchun ogohlantirish
 
   // Authenticated commands
   bot.command("help", requireAuth(), helpCommand);

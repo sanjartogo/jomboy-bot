@@ -18,7 +18,7 @@ const envSchema = z.object({
 
   // Gemini (Free AI)
   GEMINI_API_KEY: z.string().min(1),
-  GEMINI_MODEL: z.string().default("gemini-2.5-flash"),
+  GEMINI_MODEL: z.string().default("gemini-1.5-flash"),
 
   // App
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
