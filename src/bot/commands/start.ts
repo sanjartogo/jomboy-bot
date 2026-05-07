@@ -24,6 +24,8 @@ export async function startCommand(ctx: BotContext) {
             `• Yoki shunchaki yozing: "3 ta korxona, 12 mln aniqlandi"`
           : ctx.user.role === "hokim"
           ? `Siz tuman hokimi sifatida ro'yxatdasiz.\n\nKuniga 19:00 da avtomatik xulosa keladi.`
+          : ctx.user.role === "nazoratchi"
+          ? `Siz nazoratchi sifatida ro'yxatdasiz.\n\nSizga mas'ullar yuborgan barcha hisobotlar kelib tushadi.`
           : `Siz administrator sifatida ro'yxatdasiz.`),
       { reply_markup: mainMenuKeyboard(ctx.user.role) }
     );

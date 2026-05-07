@@ -14,9 +14,9 @@ interface DailyAnalysisInput {
 
 export interface DailyAnalysisOutput {
   summary: string;
-  recommendations: string;
   topPerformers: PerformerInfo[];
   bottomPerformers: PerformerInfo[];
+  totalIdentified: number;
   totalCollected: number;
   totalXyus: number;
 }
@@ -85,7 +85,6 @@ export async function generateDailySummary(
 
   return {
     summary: summary.summary,
-    recommendations: summary.recommendations,
     topPerformers,
     bottomPerformers,
     totalIdentified,
@@ -107,15 +106,14 @@ interface AISummaryInput {
 
 async function generateAITextSummary(
   input: AISummaryInput
-): Promise<{ summary: string; recommendations: string }> {
+): Promise<{ summary: string }> {
   const systemPrompt = `Sen Jomboy tuman hokimligi uchun soliq nazorati bo'yicha tahlilchisan.
 
-Vazifang: Berilgan ma'lumotlar asosida hokimga 2 qismdan iborat qisqa hisobot yozish:
+Vazifang: Berilgan ma'lumotlar asosida hokimga qisqa hisobot (SUMMARY) yozish:
 1. SUMMARY: 3-4 jumla — kunning umumiy holati. Qaysi sohalar yaxshi, qaysilari sust.
-2. RECOMMENDATIONS: 2-3 ta aniq tavsiya — nima qilish kerak.
 
 Til: rasmiy o'zbek tilida (kirill yozuvida).
-Format: ikki bo'lim, har biri "SUMMARY:" va "RECOMMENDATIONS:" bilan boshlanadi.
+Format: faqat "SUMMARY:" bilan boshlanuvchi matn.
 Uzunlik: jami 150-200 so'z.
 
 Raqamlarni qayta yozma (men ularni allaqachon ko'rib chiqaman) — faqat MA'NOSI haqida yoz:
@@ -149,7 +147,7 @@ ${input.bottomPerformers
   )
   .join("\n")}
 
-Hokim uchun qisqa tahlil va tavsiya yoz.`;
+Hokim uchun qisqa tahlil yoz. (Tavsiya berish shart emas).`;
 
   try {
     const response = await callGemini({
@@ -158,19 +156,16 @@ Hokim uchun qisqa tahlil va tavsiya yoz.`;
       temperature: 0.4,
     });
 
-    // Parse SUMMARY va RECOMMENDATIONS qismlarini ajratish
-    const summaryMatch = response.match(/SUMMARY:\s*([\s\S]+?)(?=RECOMMENDATIONS:|$)/i);
-    const recsMatch = response.match(/RECOMMENDATIONS:\s*([\s\S]+)/i);
+    // Parse SUMMARY qismini ajratish
+    const summaryMatch = response.match(/SUMMARY:\s*([\s\S]+)/i);
 
     return {
-      summary: summaryMatch?.[1]?.trim() ?? response.slice(0, 400),
-      recommendations: recsMatch?.[1]?.trim() ?? "",
+      summary: summaryMatch?.[1]?.trim() ?? response,
     };
   } catch (err) {
     logger.error({ err }, "AI summary generation failed");
     return {
       summary: "Bugungi xulosa avtomatik yaratilolmadi. Ma'lumotlarni qo'lda ko'rib chiqing.",
-      recommendations: "",
     };
   }
 }

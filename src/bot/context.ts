@@ -6,8 +6,10 @@ export interface SessionData {
   awaitingDirection?: boolean;
   selectedFromList?: number; // pending report index user is editing
   registrationOrg?: string;
-  step?: 'awaiting_name' | 'awaiting_support_message' | 'awaiting_report';
+  step?: 'awaiting_name' | 'awaiting_support_message' | 'awaiting_report' | 'awaiting_new_user_name' | 'awaiting_new_user_id' | 'awaiting_new_user_role';
   selectedDirectionId?: number;
+  newUserName?: string;
+  newUserId?: number;
 }
 
 export type BotContext = Context &

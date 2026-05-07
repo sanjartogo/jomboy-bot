@@ -29,7 +29,7 @@ export interface Report {
   identified_sum: number | null;
   collected_sum: number | null;
   comment: string | null;
-  source_type: "excel" | "image" | "text" | "manual";
+  source_type: "excel" | "image" | "text" | "manual" | "voice" | "video" | "audio" | "document";
   source_file_url: string | null;
   raw_input: string | null;
   ai_confidence: number;
@@ -86,7 +86,7 @@ export interface ParsedReportData {
 export interface PendingReport {
   user_id: string;
   parsed_data: ParsedReportData;
-  source_type: "excel" | "image" | "text";
+  source_type: "excel" | "image" | "text" | "voice" | "video" | "audio" | "document";
   source_file_url?: string;
   raw_input?: string;
   expires_at: number; // Unix timestamp

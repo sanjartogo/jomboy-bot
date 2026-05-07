@@ -41,10 +41,12 @@ export function requireAuth() {
   };
 }
 
+import type { UserRole } from "@/types";
+
 /**
- * Faqat hokim yoki admin uchun.
+ * Faqat ma'lum rolga ega foydalanuvchilar uchun.
  */
-export function requireRole(...roles: Array<"masul" | "hokim" | "admin">) {
+export function requireRole(...roles: UserRole[]) {
   return async (ctx: BotContext, next: NextFunction) => {
     if (!ctx.user || !roles.includes(ctx.user.role)) {
       await ctx.reply("❌ Sizda bu komandaga ruxsat yo'q.");

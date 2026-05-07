@@ -14,6 +14,7 @@ import { documentHandler } from "@/bot/handlers/document";
 import { photoHandler } from "@/bot/handlers/photo";
 import { textHandler } from "@/bot/handlers/text";
 import { callbackHandler } from "@/bot/handlers/callback";
+import { mediaHandler } from "@/bot/handlers/media";
 import { registerCallbackHandler, registerTextHandler } from "@/bot/commands/register";
 
 export function createBot(): Bot<BotContext> {
@@ -43,6 +44,7 @@ export function createBot(): Bot<BotContext> {
   bot.on("message:text", registerTextHandler);
 
   // Handlers
+  bot.on([":voice", ":audio", ":video"], requireAuth(), mediaHandler);
   bot.on(":document", requireAuth(), documentHandler);
   bot.on(":photo", requireAuth(), photoHandler);
   bot.on("callback_query:data", requireAuth(), callbackHandler);

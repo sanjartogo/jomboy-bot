@@ -5,6 +5,7 @@ import { getDirection } from "@/config/directions";
 import { todayISO } from "@/utils/date";
 import { logger } from "@/utils/logger";
 import { mainMenuKeyboard } from "@/bot/keyboards";
+import { InlineKeyboard } from "grammy";
 
 export async function saveAndForwardReport(ctx: BotContext, type: "text" | "image" | "excel") {
   if (!ctx.user || !ctx.session.selectedDirectionId) return;
@@ -14,47 +15,61 @@ export async function saveAndForwardReport(ctx: BotContext, type: "text" | "imag
   const dirName = dir?.name || `№${dirId}`;
 
   try {
-    // 1. Bazaga yozish (summalar va xyus_count 0 deb olinadi)
-    await upsertReport({
+    // 1. Bazaga yozish
+    let sourceType: any = type;
+    if (ctx.message?.voice) sourceType = "voice";
+    else if (ctx.message?.video) sourceType = "video";
+    else if (ctx.message?.audio) sourceType = "audio";
+
+    const report = await upsertReport({
       user_id: ctx.user.id,
       direction_id: dirId,
       report_date: todayISO(),
       xyus_count: 0,
       identified_sum: 0,
       collected_sum: 0,
-      source_type: type,
-      source_file_url: null, // Fayl manzili hozircha saqlanmayapti
+      source_type: sourceType,
+      source_file_url: null, 
       raw_input: type === "text" ? ctx.message?.text : null,
       ai_confidence: 1.0,
       ai_warnings: [],
       needs_review: false,
     });
 
-    // 2. Nazoratchiga yuborish
-    const nazoratchilar = await getAllUsersByRole("nazoratchi");
-    const caption = `📝 <b>Yangi hisobot keldi!</b>\n\n👤 Xodim: <b>${ctx.user.full_name}</b>\n📌 Yo'nalish: <b>${dirName}</b>\n📅 Sana: ${todayISO()}\n\n👇 <i>Ushbu hisobot ma'lumotlarini o'zingizda saqlang/umumlashtiring.</i>`;
+    if (!report) throw new Error("Failed to save report");
 
-    for (const nazoratchi of nazoratchilar) {
-      if (!nazoratchi.telegram_id) continue;
+    // 2. Nazoratchilarga yuborish
+    const recipients = await getAllUsersByRole("nazoratchi");
+
+    const caption = `📝 <b>Yangi hisobot keldi!</b>\n\n👤 Xodim: <b>${ctx.user.full_name}</b>\n📌 Yo'nalish: <b>${dirName}</b>\n📅 Sana: ${todayISO()}\n\n👇 <i>Ushbu hisobot ma'lumotlarini tekshiring va tasdiqlang.</i>`;
+
+    const keyboard = new InlineKeyboard()
+      .text("✅ Ko'rib chiqildi", `review_report:${report.id}`);
+
+    for (const recipient of recipients) {
+      if (!recipient.telegram_id) continue;
       try {
-        if (ctx.message?.photo || ctx.message?.document) {
-          // Rasm yoki fayl bo'lsa
-          await ctx.copyMessage(nazoratchi.telegram_id, {
-            caption,
+        if (ctx.message?.text && type === "text") {
+          const msg = `${caption}\n\n📄 <b>Matn:</b>\n${ctx.message?.text}`;
+          await ctx.api.sendMessage(recipient.telegram_id, msg, { 
             parse_mode: "HTML",
+            reply_markup: keyboard,
           });
         } else {
-          // Oddiy matn bo'lsa
-          const msg = `${caption}\n\n📄 <b>Matn:</b>\n${ctx.message?.text}`;
-          await ctx.api.sendMessage(nazoratchi.telegram_id, msg, { parse_mode: "HTML" });
+          // Barcha media turlari uchun copyMessage ishlatamiz
+          await ctx.copyMessage(recipient.telegram_id, {
+            caption,
+            parse_mode: "HTML",
+            reply_markup: keyboard,
+          });
         }
       } catch (e) {
-        logger.error({ err: e, nazoratchiId: nazoratchi.telegram_id }, "Nazoratchiga xabar yuborishda xatolik");
+        logger.error({ err: e, recipientId: recipient.telegram_id }, "Recipientga xabar yuborishda xatolik");
       }
     }
 
     // 3. Mas'ulga tasdiq
-    await ctx.reply("✅ Hisobotingiz muvaffaqiyatli qabul qilindi va Nazoratchiga yuborildi!", {
+    await ctx.reply("✅ Ma'lumot nazoratchiga yuborildi", {
       reply_markup: mainMenuKeyboard(ctx.user.role),
     });
 

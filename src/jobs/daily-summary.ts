@@ -56,7 +56,7 @@ export async function dailySummary(notify: NotificationService) {
     top_performers: analysis.topPerformers,
     bottom_performers: analysis.bottomPerformers,
     ai_summary: analysis.summary,
-    ai_recommendations: analysis.recommendations,
+    ai_recommendations: "",
   });
 
   // 4. Hokimga yuborish uchun xabar tayyorlash (HTML format)
@@ -106,11 +106,7 @@ export async function dailySummary(notify: NotificationService) {
   }
 
   if (analysis.summary) {
-    message += `💡 <b>AI TAHLILI:</b>\n${esc(analysis.summary)}\n\n`;
-  }
-
-  if (analysis.recommendations) {
-    message += `📌 <b>TAVSIYALAR:</b>\n${esc(analysis.recommendations)}`;
+    message += `💡 <b>AI TAHLILI:</b>\n${esc(analysis.summary)}`;
   }
 
   // 5. Hokim va adminlarga yuborish

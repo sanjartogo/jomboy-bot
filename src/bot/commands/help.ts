@@ -30,10 +30,15 @@ export async function helpCommand(ctx: BotContext) {
     `• /stats — Tizim statistikasi\n` +
     `• /test\\_xulosa — Sinov xulosa yuborish\n`;
 
+  const nazoratchiHelp =
+    `\n*Nazoratchi uchun:*\n` +
+    `• 📊 Umumiy statistika — Excel hisobotini yuklab olish\n` +
+    `• 🚨 Sustkashlar — Hisobot bermaganlar ro'yxati\n`;
+
   let message = baseHelp;
   if (role === "masul") message += masulHelp;
-  else if (role === "hokim") message += hokimHelp;
-  else if (role === "admin") message += masulHelp + hokimHelp + adminHelp;
+  else if (role === "hokim" || role === "admin") message += hokimHelp + adminHelp + `\n*Xodim qo'shish* bo'limi orqali yangi admin yoki nazoratchi qo'shishingiz mumkin.`;
+  else if (role === "nazoratchi") message += nazoratchiHelp;
 
   message += `\n\nTexnik yordam: @bolderapps\\_support`;
 

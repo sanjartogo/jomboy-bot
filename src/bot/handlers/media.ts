@@ -1,15 +1,8 @@
 import type { BotContext } from "@/bot/context";
 import { logger } from "@/utils/logger";
-import axios from "axios";
-import { env } from "@/config/env";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-
-export async function documentHandler(ctx: BotContext) {
+export async function mediaHandler(ctx: BotContext) {
   if (!ctx.user) return;
-
-  const doc = ctx.message?.document;
-  if (!doc) return;
 
   if (ctx.session.step !== "awaiting_report" || !ctx.session.selectedDirectionId) {
     const { mainMenuKeyboard } = await import("@/bot/keyboards");
@@ -20,13 +13,13 @@ export async function documentHandler(ctx: BotContext) {
     return;
   }
 
-  await ctx.reply("⏳ Fayl qabul qilinmoqda...");
+  await ctx.reply("⏳ Ma'lumot qabul qilinmoqda...");
 
   try {
     const { saveAndForwardReport } = await import("./_report-saver");
-    await saveAndForwardReport(ctx, "excel" as any); // generic document type
+    await saveAndForwardReport(ctx, "image"); // reuse image logic for general media (copyMessage)
   } catch (err) {
-    logger.error({ err, userId: ctx.user.id }, "Document handler failed");
+    logger.error({ err, userId: ctx.user.id }, "Media handler failed");
     await ctx.reply(
       "⚠️ Xatolik yuz berdi. Qaytadan yuborib ko'ring yoki matn ko'rinishida yozing."
     );

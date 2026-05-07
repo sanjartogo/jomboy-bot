@@ -12,12 +12,13 @@ interface CreateReportInput {
   identified_sum: number | null;
   collected_sum: number | null;
   comment?: string | null;
-  source_type: "excel" | "image" | "text" | "manual";
+  source_type: "excel" | "image" | "text" | "manual" | "voice" | "video" | "audio" | "document";
   source_file_url?: string | null;
   raw_input?: string | null;
   ai_confidence?: number;
   ai_warnings?: string[];
   needs_review?: boolean;
+  status?: "submitted" | "reviewed" | "rejected";
 }
 
 export async function upsertReport(input: CreateReportInput): Promise<Report | null> {
@@ -29,6 +30,7 @@ export async function upsertReport(input: CreateReportInput): Promise<Report | n
         ai_confidence: input.ai_confidence ?? 1.0,
         ai_warnings: input.ai_warnings ?? [],
         needs_review: input.needs_review ?? false,
+        status: input.status ?? "submitted",
       },
       { onConflict: "user_id,direction_id,report_date" }
     )
@@ -129,8 +131,8 @@ export async function getUsersWhoMissedToday(): Promise<{ user_id: string; missi
     
     // Agar bitta yo'nalish bo'yicha kamida 1 kishi hisobot topshirgan bo'lsa, 
     // u shu yo'nalishga mas'ul bo'lgan barchaga "topshirildi" deb hisoblanadi.
-    const missingDirIds = assignedDirIds.filter(d => !globallySubmittedDirs.has(d));
-    const submittedDirIds = assignedDirIds.filter(d => globallySubmittedDirs.has(d));
+    const missingDirIds = assignedDirIds.filter((d: number) => !globallySubmittedDirs.has(d));
+    const submittedDirIds = assignedDirIds.filter((d: number) => globallySubmittedDirs.has(d));
     
     if (missingDirIds.length > 0) {
       result.push({
@@ -155,4 +157,19 @@ export async function getReportStats(date: string): Promise<{
     totalCollected: reports.reduce((s, r) => s + (r.collected_sum ?? 0), 0),
     count: reports.length,
   };
+}
+export async function updateReportStatus(
+  reportId: string,
+  status: "submitted" | "reviewed" | "rejected"
+): Promise<boolean> {
+  const { error } = await supabase
+    .from("reports")
+    .update({ status })
+    .eq("id", reportId);
+
+  if (error) {
+    logger.error({ error, reportId, status }, "Failed to update report status");
+    return false;
+  }
+  return true;
 }

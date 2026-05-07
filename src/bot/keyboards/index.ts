@@ -23,12 +23,17 @@ export function mainMenuKeyboard(role: string = "masul"): Keyboard {
       .text("🚨 Sustkashlar")
       .row()
       .text("📈 Umumiy statistika")
+      .text("👤 Xodim qo'shish")
+      .row()
       .text("ℹ️ Yordam")
       .resized();
   }
   
   if (role === "nazoratchi") {
     return new Keyboard()
+      .text("🚨 Sustkashlar")
+      .text("📈 Umumiy hisobot")
+      .row()
       .text("ℹ️ Yordam")
       .resized();
   }

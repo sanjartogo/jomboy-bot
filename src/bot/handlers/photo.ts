@@ -1,6 +1,4 @@
 import type { BotContext } from "@/bot/context";
-import { parseImage } from "@/ai/parsers/image";
-import { confirmParsedReport } from "@/bot/handlers/_confirm-flow";
 import { logger } from "@/utils/logger";
 import axios from "axios";
 import { env } from "@/config/env";

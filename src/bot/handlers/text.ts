@@ -1,7 +1,5 @@
 import { InputFile } from "grammy";
 import type { BotContext } from "@/bot/context";
-import { parseText } from "@/ai/parsers/text";
-import { confirmParsedReport } from "@/bot/handlers/_confirm-flow";
 import { mainMenuKeyboard } from "@/bot/keyboards";
 import { logger } from "@/utils/logger";
 
@@ -114,10 +112,7 @@ export async function textHandler(ctx: BotContext) {
       }
 
       if (analysis.summary) {
-        message += `💡 <b>AI TAHLILI:</b>\n${esc(analysis.summary)}\n\n`;
-      }
-      if (analysis.recommendations) {
-        message += `📌 <b>TAVSIYALAR:</b>\n${esc(analysis.recommendations)}`;
+        message += `💡 <b>AI TAHLILI:</b>\n${esc(analysis.summary)}`;
       }
 
       await ctx.reply(message, { parse_mode: "HTML" });
@@ -129,7 +124,7 @@ export async function textHandler(ctx: BotContext) {
   }
 
   if (text === "🚨 Sustkashlar") {
-    if (ctx.user.role !== "hokim" && ctx.user.role !== "admin") return;
+    if (ctx.user.role !== "hokim" && ctx.user.role !== "admin" && ctx.user.role !== "nazoratchi") return;
     
     try {
       const { getUsersWhoMissedToday } = await import("@/db/queries/reports");
@@ -191,8 +186,8 @@ export async function textHandler(ctx: BotContext) {
     return;
   }
 
-  if (text === "📈 Umumiy statistika") {
-    if (ctx.user.role !== "hokim" && ctx.user.role !== "admin") return;
+  if (text === "📈 Umumiy statistika" || text === "📈 Umumiy hisobot") {
+    if (ctx.user.role !== "hokim" && ctx.user.role !== "admin" && ctx.user.role !== "nazoratchi") return;
     await ctx.reply("⏳ Excel hisobot tayyorlanmoqda. Bu biroz vaqt olishi mumkin, kuting...");
     
     try {
@@ -282,6 +277,58 @@ export async function textHandler(ctx: BotContext) {
         resize_keyboard: true
       }
     });
+    return;
+  }
+
+  if (text === "👤 Xodim qo'shish") {
+    if (ctx.user.role !== "hokim" && ctx.user.role !== "admin") return;
+    
+    ctx.session.step = "awaiting_new_user_name";
+    await ctx.reply("👤 Yangi xodimning **ism-familiyasini** kiriting:", {
+      parse_mode: "Markdown",
+      reply_markup: {
+        keyboard: [[{ text: "❌ Bekor qilish" }]],
+        resize_keyboard: true,
+        one_time_keyboard: true
+      }
+    });
+    return;
+  }
+
+  if (ctx.session.step === "awaiting_new_user_name") {
+    if (text === "❌ Bekor qilish") {
+      ctx.session.step = undefined;
+      await ctx.reply("❌ Bekor qilindi.", { reply_markup: mainMenuKeyboard(ctx.user.role) });
+      return;
+    }
+    ctx.session.newUserName = text;
+    ctx.session.step = "awaiting_new_user_id";
+    await ctx.reply(`👤 Ism: ${text}\n\nEndi uning **Telegram ID** raqamini kiriting:`, {
+      parse_mode: "Markdown"
+    });
+    return;
+  }
+
+  if (ctx.session.step === "awaiting_new_user_id") {
+    if (text === "❌ Bekor qilish") {
+      ctx.session.step = undefined;
+      await ctx.reply("❌ Bekor qilindi.", { reply_markup: mainMenuKeyboard(ctx.user.role) });
+      return;
+    }
+    const tgId = parseInt(text);
+    if (isNaN(tgId)) {
+      await ctx.reply("❌ Telegram ID raqam bo'lishi kerak. Qaytadan kiriting:");
+      return;
+    }
+    ctx.session.newUserId = tgId;
+    ctx.session.step = "awaiting_new_user_role";
+    
+    const { InlineKeyboard } = await import("grammy");
+    const kb = new InlineKeyboard()
+      .text("Nazoratchi", "add_role:nazoratchi")
+      .text("Admin", "add_role:admin");
+      
+    await ctx.reply("👤 Rolni tanlang:", { reply_markup: kb });
     return;
   }
 

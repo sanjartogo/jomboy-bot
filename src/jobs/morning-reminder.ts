@@ -42,12 +42,10 @@ export async function morningReminder(notify: NotificationService) {
 
     const message =
       `🌅 Xayrli tong, ${user.full_name}!\n\n` +
-      `Bugun (${monthName(month)}) sizning yo'nalishlaringiz:\n\n` +
+      `Bugun (${monthName(month)}) sizga quyidagi yo'nalishlar biriktirilgan:\n\n` +
       `${directionsList}\n\n` +
-      `📤 Ish tugagach natijani yuboring:\n` +
-      `• Excel fayl jo'nating\n` +
-      `• Akt rasmini jo'nating\n` +
-      `• Yoki shunchaki yozing`;
+      `📌 Ushbu yo'nalishlar bo'yicha ma'lumot yuborishingiz kerak.\n\n` +
+      `📤 Natijani yuborish uchun pastdagi tugmani bosing:`;
 
     const ok = await notify.send(user.telegram_id, message, {
       type: "morning_reminder",
