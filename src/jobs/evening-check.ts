@@ -36,7 +36,8 @@ export async function eveningCheck(notify: NotificationService) {
   }
 
   logger.info(
-    { missing: missingUserIds.length, reminded: sent },
+    { missing: missingUsers.length, reminded: sent },
     "Evening check completed"
   );
 }
+
