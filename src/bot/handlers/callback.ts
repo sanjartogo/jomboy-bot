@@ -76,20 +76,33 @@ async function handleAddRole(ctx: BotContext, role: string) {
     return;
   }
 
-  const { createUser, linkTelegramToUser } = await import("@/db/queries/users");
+  const { getUserByPhone, createUser, linkTelegramToUser } = await import("@/db/queries/users");
+  const tempPhone = `tg_${ctx.session.newUserId}`;
   
   try {
+    // 1. Avval tekshiramiz
+    const existingUser = await getUserByPhone(tempPhone);
+    if (existingUser) {
+      await ctx.editMessageText(`⚠️ <b>Xatolik:</b> Bu xodim (ID: ${ctx.session.newUserId}) allaqachon tizimda mavjud.`, { parse_mode: "HTML" });
+      
+      await ctx.reply("Asosiy menyuga qaytdingiz:", {
+        reply_markup: mainMenuKeyboard(ctx.user!.role)
+      });
+      return;
+    }
+
+    // 2. Qo'shish
     const newUser = await createUser({
       full_name: ctx.session.newUserName,
-      phone: `tg_${ctx.session.newUserId}`, 
+      phone: tempPhone, 
       role: role as any,
       direction_ids: [],
       is_active: true
     });
 
-      if (newUser) {
+    if (newUser) {
       await linkTelegramToUser(newUser.id, ctx.session.newUserId);
-      await ctx.editMessageText(`✅ Yangi xodim qo'shildi:\n👤 Ism: ${ctx.session.newUserName}\n🏢 Rol: ${role}\n🆔 ID: ${ctx.session.newUserId}`);
+      await ctx.editMessageText(`✅ <b>Muvaffaqiyatli qo'shildi!</b>\n\n👤 Ism: ${ctx.session.newUserName}\n🏢 Rol: ${role}\n🆔 ID: ${ctx.session.newUserId}`, { parse_mode: "HTML" });
       
       try {
           await ctx.api.sendMessage(ctx.session.newUserId, `Assalomu alaykum! 👋\n\nSiz Jomboy botda **${role}** sifatida ro'yxatdan o'tdingiz.\nBotni ishlatish uchun /start buyrug'ini bosing.`, { parse_mode: "Markdown" });
@@ -97,7 +110,7 @@ async function handleAddRole(ctx: BotContext, role: string) {
           logger.warn({ userId: ctx.session.newUserId }, "Could not notify new user");
       }
     } else {
-      await ctx.editMessageText("❌ Foydalanuvchini saqlashda xatolik yuz berdi.");
+      await ctx.editMessageText("❌ <b>Xatolik:</b> Foydalanuvchini saqlab bo'lmadi. (Balki bazada 'nazoratchi' roli hali ruxsat etilmagan?)", { parse_mode: "HTML" });
     }
 
     // Asosiy menyuni qaytarish
@@ -106,12 +119,15 @@ async function handleAddRole(ctx: BotContext, role: string) {
     });
 
   } catch (e) {
-
     logger.error({ err: e }, "Failed to add new user");
-    await ctx.editMessageText("❌ Xatolik yuz berdi.");
+    await ctx.editMessageText("❌ Tizimda kutilmagan xatolik yuz berdi.");
+    await ctx.reply("Asosiy menyuga qaytdingiz:", {
+      reply_markup: mainMenuKeyboard(ctx.user!.role)
+    });
   } finally {
     ctx.session.step = undefined;
     ctx.session.newUserName = undefined;
     ctx.session.newUserId = undefined;
   }
 }
+
