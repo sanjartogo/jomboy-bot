@@ -26,8 +26,8 @@ async function main() {
   const http = await import("http");
   const port = process.env.PORT || 3000;
   http.createServer((req, res) => {
-    res.writeHead(200);
-    res.end("Bot is running!");
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("OK");
   }).listen(port, () => {
     logger.info(`HTTP server listening on port ${port}`);
   });
