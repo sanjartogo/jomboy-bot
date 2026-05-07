@@ -38,6 +38,9 @@ export async function saveAndForwardReport(ctx: BotContext, type: "text" | "imag
 
     if (!report) throw new Error("Failed to save report");
 
+    // 2. Nazoratchilarga yuborish
+    const recipients = await getAllUsersByRole("nazoratchi");
+
     const caption = `📝 <b>Yangi hisobot keldi!</b>\n\n` +
       `🏢 Tashkilot: <b>${ctx.user.organization || "Noma'lum"}</b>\n` +
       `👤 Xodim: <b>${ctx.user.full_name}</b>\n` +

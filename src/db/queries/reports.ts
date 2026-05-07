@@ -133,8 +133,8 @@ export async function getUsersWhoMissedToday(): Promise<{ user_id: string; missi
     if (assignedDirIds.length === 0) continue;
 
     // Agar yo'nalish global ro'yxatda bo'lsa, demak u bajarilgan
-    const missingDirIds = assignedDirIds.filter(d => !submittedDirIdsGlobal.has(d));
-    const submittedDirIds = assignedDirIds.filter(d => submittedDirIdsGlobal.has(d));
+    const missingDirIds = assignedDirIds.filter((d: number) => !submittedDirIdsGlobal.has(d));
+    const submittedDirIds = assignedDirIds.filter((d: number) => submittedDirIdsGlobal.has(d));
     
     // Faqat birorta ham yo'nalishi yopilmagan yoki chala qolgan xodimlarni chiqaramiz
     if (missingDirIds.length > 0) {
