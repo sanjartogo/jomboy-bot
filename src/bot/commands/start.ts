@@ -1,7 +1,8 @@
 import type { BotContext } from "@/bot/context";
-import { getUserByPhone, linkTelegramToUser, normalizePhone } from "@/db/queries/users";
+import { createUser, getUserByPhone, linkTelegramToUser, normalizePhone } from "@/db/queries/users";
 import { organizationsKeyboard, mainMenuKeyboard } from "@/bot/keyboards";
 import { getDirectionShortName } from "@/config/directions";
+import { env } from "@/config/env";
 import { logger } from "@/utils/logger";
 
 export async function startCommand(ctx: BotContext) {
@@ -10,7 +11,8 @@ export async function startCommand(ctx: BotContext) {
 
   // Allaqachon ro'yxatda bormi?
   if (ctx.user) {
-    const directionsList = ctx.user.direction_ids
+    // ... existing greeting logic ...
+    const directionsList = (ctx.user.direction_ids || [])
       .map((id) => `   • №${id} — ${getDirectionShortName(id, 50)}`)
       .join("\n");
 
@@ -30,6 +32,29 @@ export async function startCommand(ctx: BotContext) {
       { reply_markup: mainMenuKeyboard(ctx.user.role) }
     );
     return;
+  }
+
+  // AGAR ADMIN YOKI HOKIM BO'LSA - AVTOMATIK RO'YXATDAN O'TKAZISH
+  if (env.ADMIN_TELEGRAM_IDS.includes(telegramId) || env.HOKIM_TELEGRAM_ID === telegramId) {
+    const role = env.HOKIM_TELEGRAM_ID === telegramId ? "hokim" : "admin";
+    const newUser = await createUser({
+      telegram_id: telegramId,
+      full_name: ctx.from.first_name + (ctx.from.last_name ? ` ${ctx.from.last_name}` : ""),
+      role: role,
+      organization: role === "hokim" ? "Jomboy tumani hokimligi" : "Boshqaruv",
+      is_active: true,
+      direction_ids: []
+    });
+
+    if (newUser) {
+      ctx.user = newUser;
+      await ctx.reply(
+        `Xush kelibsiz, ${role === "hokim" ? "Hokim buva" : "Admin"}! 👋\n\n` +
+        `Siz tizimda avtomatik ravishda tanildingiz.`,
+        { reply_markup: mainMenuKeyboard(role) }
+      );
+      return;
+    }
   }
 
   // Ro'yxatda yo'q — tashkilot so'rash
