@@ -15,7 +15,7 @@ import { photoHandler } from "@/bot/handlers/photo";
 import { textHandler } from "@/bot/handlers/text";
 import { callbackHandler } from "@/bot/handlers/callback";
 import { mediaHandler } from "@/bot/handlers/media";
-import { registerCallbackHandler, registerTextHandler } from "@/bot/commands/register";
+import { registerCallbackHandler, registerTextHandler, registerContactHandler } from "@/bot/commands/register";
 
 export function createBot(): Bot<BotContext> {
   const bot = new Bot<BotContext>(env.BOT_TOKEN);
@@ -33,7 +33,8 @@ export function createBot(): Bot<BotContext> {
 
   // Commands (ro'yxatdan o'tmaganlarga ham /start ishlaydi)
   bot.command("start", startCommand);
-  bot.on(":contact", handleContact);
+  bot.on(":contact", registerContactHandler); // Ro'yxatdan o'tish uchun kontaktni tutib olamiz
+  bot.on(":contact", handleContact); // Eskirgan raqam yuborish uchun ogohlantirish
 
   // Authenticated commands
   bot.command("help", requireAuth(), helpCommand);

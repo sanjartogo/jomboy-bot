@@ -40,8 +40,36 @@ export async function registerTextHandler(ctx: BotContext, next: () => Promise<v
     return;
   }
 
+  // Ismni saqlab qolamiz va kontaktni so'raymiz
+  ctx.session.registrationName = name;
+  ctx.session.step = "awaiting_contact";
+
+  const { shareContactKeyboard } = await import("@/bot/keyboards");
+  await ctx.reply(
+    `Rahmat, ${name}!\n\n` +
+    `Oxirgi qadam: Iltimos, pastdagi tugmani bosib telefon raqamingizni yuboring:`,
+    { reply_markup: shareContactKeyboard() }
+  );
+}
+
+/**
+ * Kontakt yuborilganida
+ */
+export async function registerContactHandler(ctx: BotContext) {
+  if (ctx.session.step !== "awaiting_contact" || !ctx.session.registrationOrg || !ctx.session.registrationName) {
+    return;
+  }
+
+  const contact = ctx.message?.contact;
+  if (!contact) {
+    await ctx.reply("Iltimos, pastdagi tugmani bosib telefon raqamingizni yuboring.");
+    return;
+  }
+
+  const name = ctx.session.registrationName;
   const selectedOrg = ctx.session.registrationOrg;
   const telegramId = ctx.from?.id;
+  const phone = contact.phone_number;
   
   if (!telegramId) return;
 
@@ -56,18 +84,10 @@ export async function registerTextHandler(ctx: BotContext, next: () => Promise<v
     .map((d: any) => d.id);
 
   try {
-    // Create new user in DB
-    // To allow multiple people to register without phone uniqueness issues,
-    // we use a dummy phone or just null if DB allows. 
-    // Wait, the DB schema has `phone TEXT UNIQUE`. 
-    // We can use telegramId as a dummy phone string, e.g. `tg_${telegramId}`
-    const dummyPhone = `tg_${telegramId}`;
-    
-    // Check if a user with this telegramId already linked
-    // We actually shouldn't reach here if they are already in DB because /start catches it.
+    const { normalizePhone } = await import("@/db/queries/users");
     const newUser = await createUser({
       full_name: name,
-      phone: dummyPhone,
+      phone: normalizePhone(phone),
       role: "masul",
       direction_ids: assignedDirectionIds,
       is_active: true
@@ -79,16 +99,18 @@ export async function registerTextHandler(ctx: BotContext, next: () => Promise<v
       // Clear session
       ctx.session.step = undefined;
       ctx.session.registrationOrg = undefined;
+      ctx.session.registrationName = undefined;
       ctx.user = { ...newUser, telegram_id: telegramId };
 
       await ctx.reply(
         `✅ Tabriklaymiz, ${name}!\n\n` +
-        `Siz tizimdan ro'yxatdan o'tdingiz. Sizga **${assignedDirectionIds.length}** ta yo'nalish biriktirildi.\n\n` +
-        `Endi "📤 Hisobot yuborish" tugmasi orqali hisobotlaringizni yuborishingiz mumkin.`,
+        `Siz tizimdan muvaffaqiyatli ro'yxatdan o'tdingiz.\n` +
+        `Sizga **${assignedDirectionIds.length}** ta yo'nalish biriktirildi.\n\n` +
+        `Endi botdan to'liq foydalanishingiz mumkin.`,
         { reply_markup: mainMenuKeyboard(newUser.role) }
       );
     } else {
-      await ctx.reply("❌ Ro'yxatdan o'tishda xatolik yuz berdi.");
+      await ctx.reply("❌ Ro'yxatdan o'tishda xatolik yuz berdi. Balki bu raqam allaqachon ro'yxatdan o'tgan bo'lishi mumkin.");
     }
   } catch (error) {
     logger.error({ error, telegramId }, "Registration error");
