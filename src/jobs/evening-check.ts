@@ -10,27 +10,17 @@ import type { NotificationService } from "@/services/notification";
 export async function eveningCheck(notify: NotificationService) {
   logger.info("Evening check job started");
 
-  const missingUserIds = await getUsersWhoMissedToday();
+  const missingUsers = await getUsersWhoMissedToday();
 
-  if (missingUserIds.length === 0) {
+  if (missingUsers.length === 0) {
     logger.info("All masullar reported today 🎉");
     return;
   }
 
-  // Foydalanuvchilarni olish
-  const { data: users, error } = await supabase
-    .from("users")
-    .select("*")
-    .in("id", missingUserIds);
-
-  if (error || !users) {
-    logger.error({ error }, "Failed to get missing users");
-    return;
-  }
-
   let sent = 0;
-  for (const user of users) {
+  for (const user of missingUsers) {
     if (!user.telegram_id) continue;
+
 
     const message =
       `⚠️ ${user.full_name}, bugungi hisobotingiz hali kelmadi.\n\n` +

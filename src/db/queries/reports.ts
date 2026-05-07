@@ -202,3 +202,26 @@ export async function updateReportStatus(
   }
   return true;
 }
+
+export async function getUsersWhoMissedToday(): Promise<any[]> {
+  const today = todayISO();
+  
+  const { data: users, error: e1 } = await supabase
+    .from("users")
+    .select("id, full_name, organization")
+    .eq("role", "masul")
+    .eq("is_active", true);
+
+  if (e1) return [];
+
+  const { data: reports, error: e2 } = await supabase
+    .from("reports")
+    .select("user_id")
+    .eq("report_date", today);
+
+  if (e2) return [];
+
+  const reportedUserIds = new Set((reports || []).map((r: any) => r.user_id));
+  return (users || []).filter((u: any) => !reportedUserIds.has(u.id));
+}
+

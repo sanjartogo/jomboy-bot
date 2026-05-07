@@ -50,7 +50,7 @@ export async function dailySummary(notify: NotificationService) {
     summary_date: today,
     reports_submitted: reports.length,
     reports_missing: missingData.length,
-    missing_user_ids: missingData.map(m => m.user_id),
+    missing_user_ids: missingData.map((m: any) => m.id),
     total_identified: analysis.totalIdentified,
     total_collected: analysis.totalCollected,
     top_performers: analysis.topPerformers,
@@ -60,14 +60,15 @@ export async function dailySummary(notify: NotificationService) {
   });
 
   // 4. Hokimga yuborish uchun xabar tayyorlash (HTML format)
-  const uniqueReportedUsers = new Set(reports.map(r => r.user_id)).size;
+  const uniqueReportedUsers = new Set(reports.map((r: any) => r.user_id)).size;
   const submittedPct = ((uniqueReportedUsers / masullar.length) * 100).toFixed(0);
 
   const missingNames = masullar
-    .filter((u) => missingData.some(m => m.user_id === u.id))
+    .filter((u: any) => missingData.some((m: any) => m.id === u.id))
     .slice(0, 6)
-    .map((u) => `   • ${esc(u.full_name)}`)
+    .map((u: any) => `   • ${esc(u.full_name)}`)
     .join("\n");
+
 
   let message = `📊 <b>JOMBOY TUMANI — ${esc(formatDate(new Date()))}</b>\n`;
   message += `${"━".repeat(28)}\n\n`;
